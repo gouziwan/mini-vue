@@ -48,6 +48,7 @@ interface ComponentInstance {
 	mounted?: Function;
 	provides: Map;
 	parent: ComponentInstance;
+	_subTree: null | VNode;
 }
 
 interface ComponentCtx {

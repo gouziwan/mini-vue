@@ -1,25 +1,31 @@
+import { effect } from "../reactivity/effect";
 import { getEventkey, isArray, isKeyEvent, isObject, isString } from "./../utils/index";
 import { createComponentInstall, setupComponent } from "./component";
 
 export function render(vnode: VNode, container: HTMLDivElement, parent?: ComponentInstance) {
 	// 这里就是根据不同去挂载不一样的
-	patch(vnode, container, parent!);
+	patch(null, vnode, container, parent!);
 }
 
 // 处理挂载组件的
-function patch(vnode: VNode, container: HTMLDivElement, parent: ComponentInstance) {
+function patch(n1: null | VNode, n2: VNode, container: HTMLDivElement, parent: ComponentInstance) {
 	// 判断他是不是一个组件 如果不是 那就是渲染元素
-	if (isObject(vnode.type)) {
-		processComponent(vnode, container, parent);
-	} else if (isString(vnode.type)) {
+	if (isObject(n2.type)) {
+		processComponent(n1, n2, container, parent);
+	} else if (isString(n2.type)) {
 		// 处理element类型
-		processElements(vnode, container, parent);
+		processElements(n1, n2, container, parent);
 	}
 }
 
 // 组件的处理
-function processComponent(vnode: VNode, container: HTMLDivElement, parent: ComponentInstance) {
-	mountComponent(vnode, container, parent);
+function processComponent(
+	n1: VNode | null,
+	n2: VNode,
+	container: HTMLDivElement,
+	parent: ComponentInstance
+) {
+	mountComponent(n2, container, parent);
 }
 
 // 挂载组件
@@ -37,14 +43,59 @@ function setupRenderEffect(
 	container: HTMLDivElement,
 	parent: ComponentInstance
 ) {
-	const { _ctx } = instace;
-	const subTree = instace._render!.call(_ctx);
-	// render函数重新得到的虚拟dom节点再重新执行 patch函数
-	patch(subTree, container, parent);
-	instace.$el = subTree.el!;
+	effect(() => {
+		const { _ctx } = instace;
+		// 说明没挂载
+		if (instace._subTree == null) {
+			const subTree = (instace._subTree = instace._render!.call(_ctx));
+			// render函数重新得到的虚拟dom节点再重新执行 patch函数
+			patch(null, subTree, container, parent);
+			instace.$el = subTree.el!;
+		} else {
+			// 旧的虚拟dom
+			const _prevSubTree = instace._subTree;
+			// 新的虚拟dom
+			const subTree = (instace._subTree = instace._render!.call(_ctx));
+
+			patch(_prevSubTree, subTree, container, parent);
+		}
+	});
 }
-function processElements(vnode: VNode, container: HTMLDivElement, parent: ComponentInstance) {
-	mountElement(vnode, container, parent);
+function processElements(
+	n1: null | VNode = null,
+	n2: VNode,
+	container: HTMLDivElement,
+	parent: ComponentInstance
+) {
+	if (n1 == null) {
+		mountElement(n2, container, parent);
+	} else {
+		// 更新阶段
+		patchElement(n1, n2, container);
+	}
+}
+
+function patchElement(n1: VNode | null, n2: VNode, container: any) {
+	patchProps(n1, n2);
+}
+
+function patchProps(n1: VNode | null, n2: VNode) {
+	let oldProps = n1!.props || {};
+	let newProps = n2.props || {};
+
+	let el = (n2.el = n1!.el);
+
+	for (let key in newProps) {
+		let value = newProps[key];
+		// 如果他们两不一致就修改
+		if (oldProps[key] !== value) {
+			if (value === undefined || value === null) {
+				el?.removeAttribute(key);
+			} else {
+				el?.setAttribute(key, value);
+			}
+		}
+	}
 }
 
 function mountElement(vnode: VNode, container: HTMLDivElement, parent: ComponentInstance) {
@@ -56,7 +107,7 @@ function mountElement(vnode: VNode, container: HTMLDivElement, parent: Component
 		// 是不是字符串
 		createChilderText(element!, children as unknown as string);
 	} else if (isArray(children)) {
-		children?.forEach((vnode: any) => patch(vnode, element, parent));
+		children?.forEach((vnode: any) => patch(null, vnode, element, parent));
 	}
 	// 挂载属性
 	if (isObject(props)) {

@@ -4,6 +4,7 @@ import { initProps } from "./componentProps";
 import { emit } from "./componentEmit";
 import { initSlost } from "./componentsSlost";
 import { addInstaceMap } from "./createApp";
+import { proxyRefs } from "../reactivity/ref";
 
 let currentInstace = null as any;
 
@@ -19,7 +20,8 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 		emit,
 		$slots: {},
 		provides: parent?.provides ? parent.provides : {},
-		parent
+		parent,
+		_subTree: null
 	};
 
 	instace.emit = emit;
@@ -67,7 +69,7 @@ export function handleSetupResult(instace: ComponentInstance) {
 			console.warn(`setup函数 返回值不能为${state}`);
 			state = {};
 		}
-		instace.state = state;
+		instace.state = proxyRefs(state);
 		currentInstace = null;
 	}
 }
@@ -84,25 +86,25 @@ export function finishComponentSetup(instace: ComponentInstance) {
 }
 
 export function createContent(install: ComponentInstance) {
-	const { state, props } = install;
-
 	const ctx = {
 		$el: (install: ComponentInstance) => install.$el,
 		$slots: (install: ComponentInstance) => install.$slots
-	};
-
-	const value = {
-		...state,
-		...props
 	};
 
 	return new Proxy(
 		{},
 		{
 			get(target, key) {
-				if (key in value) {
-					return value[key];
+				const { props, state }: any = install;
+
+				if (key in state) {
+					return state[key];
 				}
+
+				if (key in props) {
+					return props[key];
+				}
+
 				if (key in ctx) {
 					return ctx[key as keyof typeof ctx](install);
 				}

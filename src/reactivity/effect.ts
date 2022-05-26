@@ -47,7 +47,6 @@ export function effect(fn: any, options?: EffectScheduler) {
 	// 等 run函数执行完毕
 	const runner: any = _effect.run.bind(_effect);
 	runner.effect = _effect;
-	currentEffect = null;
 	return runner;
 }
 

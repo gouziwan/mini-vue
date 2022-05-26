@@ -1,33 +1,49 @@
 import Foo from "./component/Foo";
+import { ref } from "./reactivity/ref";
 import { h, inject, provide } from "./runtime-core";
 
 export const App: Component = {
 	name: "App",
 	render() {
-		return h("div", [h("p", {}, "provide"), h(AppChild)]);
+		return h(
+			"div",
+			{
+				bar: this.data.bar,
+				foo: this.data.foo
+			},
+			[
+				h("p", {}, "count:" + this.count),
+				h("button", { onClick: this.onClick }, "点击添加"),
+				h("button", { onClick: this.upFoo }, "修改foo"),
+				h("button", { onClick: this.upFooisNull }, "将foo修改为null"),
+				h("button", { onClick: this.removeBar }, "将bar移除")
+			]
+		);
 	},
 	setup() {
-		provide("bar", "bar");
-		provide("Foo", "Foo");
-		return {};
-	}
-};
+		const count = ref(0);
 
-const AppChild: Component = {
-	name: "AppChild",
-	render() {
-		return h("div", {}, [h("p", {}, `AppChild  => ${this.Foo} ber => ${this.ber}`), h(Foo)]);
-	},
-	setup() {
-		provide("Foo", "AppChildFoo");
+		const data = ref({
+			bar: "bar",
+			foo: "foo"
+		});
 
-		const Foo = inject("Foo");
+		const upFoo = () => (data.value.foo = "new-foo");
 
-		const ber = inject("ber", "ber");
+		const upFooisNull = () => (data.value.foo = null);
 
+		const removeBar = () => (data.value = []);
+
+		const onClick = () => {
+			count.value = ++count.value;
+		};
 		return {
-			Foo,
-			ber
+			count,
+			onClick,
+			data,
+			upFoo,
+			upFooisNull,
+			removeBar
 		};
 	}
 };
