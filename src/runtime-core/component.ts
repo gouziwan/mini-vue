@@ -11,6 +11,7 @@ let currentInstace = null as any;
 // 创建一个组件的实例对象
 export function createComponentInstall(vnode: VNode, parent: ComponentInstance) {
 	const instace: ComponentInstance = {
+		name: typeof vnode.type === "string" ? "components" : vnode.type.name,
 		_vnode: vnode,
 		_component: vnode.type,
 		state: {},

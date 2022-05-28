@@ -1,7 +1,6 @@
 import { extend, isObject } from "./../utils/index";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveConst, readonly } from "./reactive";
-
 // 这里是做一个代码的优化 然后 这个高阶函数只会调用一次
 const get = createGetter();
 const set = createSetter();

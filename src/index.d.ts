@@ -32,6 +32,7 @@ type ComponentProps = {
 };
 
 interface ComponentInstance {
+	name?: string;
 	state: any;
 	_component: VNode.type;
 	_vnode: VNode;

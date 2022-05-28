@@ -1,49 +1,68 @@
 import Foo from "./component/Foo";
 import { ref } from "./reactivity/ref";
-import { h, inject, provide } from "./runtime-core";
+import { h, provide, inject } from "./runtime-core";
 
-export const App: Component = {
-	name: "App",
+const ArrayList: Component = {
+	name: "ArrayList",
+
+	setup() {
+		let arr = inject("arr", []);
+
+		return {
+			arr
+		};
+	},
+
 	render() {
 		return h(
 			"div",
 			{
-				bar: this.data.bar,
-				foo: this.data.foo
+				class: "chid"
 			},
-			[
-				h("p", {}, "count:" + this.count),
-				h("button", { onClick: this.onClick }, "点击添加"),
-				h("button", { onClick: this.upFoo }, "修改foo"),
-				h("button", { onClick: this.upFooisNull }, "将foo修改为null"),
-				h("button", { onClick: this.removeBar }, "将bar移除")
-			]
+			this.arr.map((el: string) => h("li", {}, el))
 		);
+	}
+};
+
+const ArrayChilder: Component = {
+	name: "ArrayChilder",
+	setup() {
+		const isValue = (window.ref = ref(true));
+
+		const arr = new Array(10).fill("").map((el, index) => `列表${index + 1}`);
+
+		provide("arr", arr);
+
+		return {
+			isValue
+		};
+	},
+
+	render() {
+		return h(
+			"div",
+			{
+				class: "chid"
+			},
+			this.isValue === true ? "newChilder" : "换一个文本看看"
+		);
+	}
+};
+
+const AppChiled: Component = {
+	render() {
+		return h("div", {}, [h(ArrayChilder)]);
+	}
+};
+
+export const App: Component = {
+	name: "App",
+	render() {
+		return h("div", {}, [h("p", {}, this.msg), h(AppChiled, {})]);
 	},
 	setup() {
-		const count = ref(0);
-
-		const data = ref({
-			bar: "bar",
-			foo: "foo"
-		});
-
-		const upFoo = () => (data.value.foo = "new-foo");
-
-		const upFooisNull = () => (data.value.foo = null);
-
-		const removeBar = () => (data.value = []);
-
-		const onClick = () => {
-			count.value = ++count.value;
-		};
 		return {
-			count,
-			onClick,
-			data,
-			upFoo,
-			upFooisNull,
-			removeBar
+			msg: "主页"
 		};
 	}
 };
