@@ -2,6 +2,7 @@ import { effect } from "../reactivity/effect";
 import { getSequence } from "../utils/getSequence";
 import { getEventkey, isArray, isKeyEvent, isObject, isString } from "./../utils/index";
 import { createComponentInstall, setupComponent } from "./component";
+import { updateProps, isUpdateComponets } from "./componentProps";
 
 export function render(
 	vnode: VNode,
@@ -22,7 +23,6 @@ function patch(
 	anchor: HTMLDivElement
 ) {
 	// 判断他是不是一个组件 如果不是 那就是渲染元素
-
 	if (isObject(n2.type)) {
 		processComponent(n1, n2, container, parent, anchor);
 	} else if (isString(n2.type)) {
@@ -39,7 +39,11 @@ function processComponent(
 	parent: ComponentInstance,
 	anchor: HTMLDivElement
 ) {
-	mountComponent(n2, container, parent, anchor);
+	if (!n1) {
+		mountComponent(n2, container, parent, anchor);
+	} else {
+		updateComponent(n1, n2);
+	}
 }
 
 // 挂载组件
@@ -49,7 +53,7 @@ function mountComponent(
 	parent: ComponentInstance,
 	anchor: HTMLDivElement
 ) {
-	const instace = createComponentInstall(vnode, parent);
+	const instace = (vnode._install = createComponentInstall(vnode, parent));
 	// 初始化 instace对象实例
 	setupComponent(instace);
 	// 调用render函数进行渲染
@@ -63,12 +67,11 @@ function setupRenderEffect(
 	parent: ComponentInstance,
 	anchor: HTMLDivElement
 ) {
-	effect(() => {
+	instace.updatedComponent = effect(() => {
 		const { _ctx } = instace;
 		// 说明没挂载
 		if (instace._subTree == null) {
 			const subTree = (instace._subTree = instace._render!.call(_ctx));
-
 			// render函数重新得到的虚拟dom节点再重新执行 patch函数
 			patch(null, subTree, container, parent, anchor);
 			instace.$el = subTree.el!;
@@ -82,6 +85,19 @@ function setupRenderEffect(
 		}
 	});
 }
+
+function updateComponent(n1: VNode, n2: VNode) {
+	n2._install = n1._install;
+
+	if (isUpdateComponets(n1, n2)) {
+		const { _install } = n2;
+		_install!._vnode = n2;
+		updateProps(_install!);
+		// 这里主要是更新
+		_install?.updatedComponent();
+	}
+}
+
 function processElements(
 	n1: null | VNode = null,
 	n2: VNode,

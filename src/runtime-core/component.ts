@@ -22,7 +22,8 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 		$slots: {},
 		provides: parent?.provides ? parent.provides : {},
 		parent,
-		_subTree: null
+		_subTree: null,
+		updatedComponent: null
 	};
 
 	instace.emit = emit;

@@ -15,16 +15,23 @@ const App: Component = {
 			++count.value;
 		};
 
+		const nums = ref(0);
+
+		const onClickNums = () => {
+			++nums.value;
+		};
 		return {
 			msg,
 			onClick,
 			count,
-			onClickAdd
+			onClickAdd,
+			onClickNums,
+			nums
 		};
 	},
 	render() {
 		return h("div", {}, [
-			h(Childern, { msg: this.msg }),
+			h(Childern, { msg: this.msg, count: this.count }),
 			h(
 				"button",
 				{
@@ -39,7 +46,15 @@ const App: Component = {
 				},
 				"点击count++"
 			),
-			h("p", {}, `${this.count}`)
+			h("p", {}, `${this.count}`),
+			h(
+				"button",
+				{
+					onClick: this.onClickNums
+				},
+				"nums++"
+			),
+			h("p", {}, `${this.nums}`)
 		]);
 	}
 };
@@ -49,7 +64,13 @@ const Childern: Component = {
 	props: ["msg"],
 	render() {
 		console.log(1);
-		return h("div", {}, `hello world - childer msg ->${this.$props.msg}`);
+		return h(
+			"div",
+			{
+				count: this.$attr.count
+			},
+			`hello world - childer msg ->${this.$props.msg}`
+		);
 	}
 };
 

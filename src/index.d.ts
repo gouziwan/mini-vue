@@ -26,6 +26,7 @@ interface VNode {
 	children?: any;
 	el: null | HTMLDivElement;
 	key: any;
+	_install: null | ComponentInstance;
 }
 
 type ComponentProps = {
@@ -51,6 +52,7 @@ interface ComponentInstance {
 	provides: Map;
 	parent: ComponentInstance;
 	_subTree: null | VNode;
+	updatedComponent: any;
 }
 
 interface ComponentCtx {

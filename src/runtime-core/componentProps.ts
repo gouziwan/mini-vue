@@ -33,6 +33,8 @@ export function initProps(instace: ComponentInstance) {
 	// 设置为只读对象
 	data.props = readonly(data.props);
 	extend(instace, data);
+
+	console.log(instace, data);
 }
 
 function disposeProps(instace: any, data: any, key: string) {
@@ -65,4 +67,32 @@ function disposeEvent(props: any, data: any, key: string) {
 
 function disposeArtt(props: any, data: any, key: string) {
 	data.attr[key] = props[key];
+}
+
+export function updateProps(_install: ComponentInstance) {
+	initProps(_install);
+}
+
+// 判断是否要更新组件主要是判断props的值
+export function isUpdateComponets(n1: VNode, n2: VNode) {
+	if (
+		// 2个都不存在不用更新
+		(!n2.props && !n1.props) ||
+		// n1不存在 n2存在但是他的props是个空对象的也不用更新
+		(!n1.props && n2.props && Object.keys(n2.props).length <= 0)
+	) {
+		return false;
+	}
+
+	if (!n1.props && n2.props) {
+		return true;
+	} else {
+		for (let key in n1.props) {
+			if (n2.props![key] !== n1.props[key]) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
