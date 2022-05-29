@@ -8,7 +8,7 @@ export function createApp(rootComponents: Component) {
 		mount(rootConents: string | HTMLDivElement) {
 			const vnode = createVNode(rootComponents);
 			// 这个是渲染根组件的
-			render(vnode, getElementNode(rootConents), undefined);
+			render(vnode, getElementNode(rootConents), null!, undefined);
 			// 执行生命周期
 			execInstaceOnMouted();
 		}

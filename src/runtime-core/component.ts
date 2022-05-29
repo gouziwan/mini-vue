@@ -89,21 +89,19 @@ export function finishComponentSetup(instace: ComponentInstance) {
 export function createContent(install: ComponentInstance) {
 	const ctx = {
 		$el: (install: ComponentInstance) => install.$el,
-		$slots: (install: ComponentInstance) => install.$slots
+		$slots: (install: ComponentInstance) => install.$slots,
+		$attr: (install: ComponentInstance) => install.attr,
+		$props: (install: ComponentInstance) => install.props
 	};
 
 	return new Proxy(
 		{},
 		{
 			get(target, key) {
-				const { props, state }: any = install;
+				const { state }: any = install;
 
 				if (key in state) {
 					return state[key];
-				}
-
-				if (key in props) {
-					return props[key];
 				}
 
 				if (key in ctx) {

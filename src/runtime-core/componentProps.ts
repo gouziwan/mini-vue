@@ -47,11 +47,13 @@ function disposeProps(instace: any, data: any, key: string) {
 		};
 	}
 
-	if (val.constructor !== com.type.name) {
-		val = com.default == undefined ? val : com.default;
-		console.warn(
-			`当前传递的参数跟子组件的参数类型不一至 ${val.constructor.name} to ${com.type.name}`
-		);
+	if (!isArray(instace._component.props)) {
+		if (val.constructor !== com.type.name) {
+			val = com.default == undefined ? val : com.default;
+			console.warn(
+				`当前传递的参数跟子组件的参数类型不一至 ${val.constructor.name} to ${com.type.name}`
+			);
+		}
 	}
 
 	data.props[key] = val;

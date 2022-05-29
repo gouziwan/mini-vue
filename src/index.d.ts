@@ -25,6 +25,7 @@ interface VNode {
 	props?: ComponentProps;
 	children?: any;
 	el: null | HTMLDivElement;
+	key: any;
 }
 
 type ComponentProps = {
@@ -54,4 +55,8 @@ interface ComponentInstance {
 
 interface ComponentCtx {
 	[x: string]: any;
+	$el: HTMLDivElement | null;
+	$props: any;
+	slots: any;
+	$attr: any;
 }

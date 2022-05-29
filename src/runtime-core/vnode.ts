@@ -8,7 +8,8 @@ export function createVNode(
 		type,
 		props,
 		children,
-		el: null
+		el: null,
+		key: props?.key
 	};
 
 	return vnode;
