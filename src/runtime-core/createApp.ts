@@ -28,6 +28,6 @@ export function addInstaceMap(instace: ComponentInstance) {
 export function execInstaceOnMouted() {
 	while (instaceMap.length > 0) {
 		let instace = instaceMap.pop();
-		instace?.mounted!();
+		instace?.activity.onMounted && instace?.activity.onMounted!();
 	}
 }

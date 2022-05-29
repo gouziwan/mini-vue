@@ -1,9 +1,17 @@
 import { ref } from "./reactivity/ref";
-import { h } from "./runtime-core/index";
+import {
+	h,
+	getCurrentInstace,
+	onBeforeUpdate,
+	onUpdated,
+	onBeforeMountd
+} from "./runtime-core/index";
 const App: Component = {
 	name: "App",
 	setup() {
 		const msg = ref("App消息");
+
+		const instace = getCurrentInstace();
 
 		const onClick = () => {
 			msg.value = "更新后的App消息";
@@ -18,8 +26,23 @@ const App: Component = {
 		const nums = ref(0);
 
 		const onClickNums = () => {
-			++nums.value;
+			for (let i = 0; i < 99; i++) {
+				nums.value = i;
+			}
 		};
+
+		onBeforeMountd(() => {
+			console.log(`组件即将挂载但是`, instace.state.msg, document.querySelector(".nums"));
+		});
+
+		onBeforeUpdate(() => {
+			console.log(`组件即将更新的值`, msg.value, document.querySelector(".nums")?.innerHTML);
+		});
+
+		onUpdated(() => {
+			console.log(`组件更新后的值`, instace.state.msg, document.querySelector(".nums")?.innerHTML);
+		});
+
 		return {
 			msg,
 			onClick,
@@ -54,7 +77,7 @@ const App: Component = {
 				},
 				"nums++"
 			),
-			h("p", {}, `${this.nums}`)
+			h("p", { class: "nums" }, `${this.nums}`)
 		]);
 	}
 };
@@ -63,7 +86,6 @@ const Childern: Component = {
 	name: "Childern",
 	props: ["msg"],
 	render() {
-		console.log(1);
 		return h(
 			"div",
 			{

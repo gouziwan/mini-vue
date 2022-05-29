@@ -5,7 +5,6 @@ import { reactive, ReactiveConst, readonly } from "./reactive";
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
-
 const shallowReadonlyGet = createGetter(true, true);
 
 // 这里是抽离公共代码

@@ -33,8 +33,6 @@ export function initProps(instace: ComponentInstance) {
 	// 设置为只读对象
 	data.props = readonly(data.props);
 	extend(instace, data);
-
-	console.log(instace, data);
 }
 
 function disposeProps(instace: any, data: any, key: string) {

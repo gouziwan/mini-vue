@@ -1,5 +1,6 @@
 import { effect } from "../reactivity/effect";
 import { getSequence } from "../utils/getSequence";
+import { addQueue } from "../utils/queue";
 import { getEventkey, isArray, isKeyEvent, isObject, isString } from "./../utils/index";
 import { createComponentInstall, setupComponent } from "./component";
 import { updateProps, isUpdateComponets } from "./componentProps";
@@ -67,23 +68,34 @@ function setupRenderEffect(
 	parent: ComponentInstance,
 	anchor: HTMLDivElement
 ) {
-	instace.updatedComponent = effect(() => {
-		const { _ctx } = instace;
-		// 说明没挂载
-		if (instace._subTree == null) {
-			const subTree = (instace._subTree = instace._render!.call(_ctx));
-			// render函数重新得到的虚拟dom节点再重新执行 patch函数
-			patch(null, subTree, container, parent, anchor);
-			instace.$el = subTree.el!;
-		} else {
-			// 旧的虚拟dom
-			const _prevSubTree = instace._subTree;
-			// 新的虚拟dom
-			const subTree = (instace._subTree = instace._render!.call(_ctx));
+	instace.updatedComponent = effect(
+		() => {
+			const { _ctx } = instace;
+			// 说明没挂载
+			if (instace._subTree == null) {
+				const subTree = (instace._subTree = instace._render!.call(_ctx));
+				// 执行
+				instace.activity.onBeforeMountd && instace.activity.onBeforeMountd();
+				// render函数重新得到的虚拟dom节点再重新执行 patch函数
+				patch(null, subTree, container, parent, anchor);
+				instace.$el = subTree.el!;
+			} else {
+				// 旧的虚拟dom
+				const _prevSubTree = instace._subTree;
+				// 新的虚拟dom
+				const subTree = (instace._subTree = instace._render!.call(_ctx));
 
-			patch(_prevSubTree, subTree, container, parent, anchor);
+				patch(_prevSubTree, subTree, container, parent, anchor);
+
+				instace.activity?.onUpdated && instace.activity?.onUpdated();
+			}
+		},
+		{
+			scheduler() {
+				addQueue(instace);
+			}
 		}
-	});
+	);
 }
 
 function updateComponent(n1: VNode, n2: VNode) {

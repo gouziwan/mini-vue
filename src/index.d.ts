@@ -53,6 +53,7 @@ interface ComponentInstance {
 	parent: ComponentInstance;
 	_subTree: null | VNode;
 	updatedComponent: any;
+	activity: Activity;
 }
 
 interface ComponentCtx {
@@ -61,4 +62,11 @@ interface ComponentCtx {
 	$props: any;
 	slots: any;
 	$attr: any;
+}
+
+interface Activity {
+	onBeforeMountd?: Function;
+	onMounted?: Function;
+	onBeforeUpdate?: Function;
+	onUpdated?: Function;
 }

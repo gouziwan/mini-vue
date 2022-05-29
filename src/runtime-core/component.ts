@@ -6,7 +6,7 @@ import { initSlost } from "./componentsSlost";
 import { addInstaceMap } from "./createApp";
 import { proxyRefs } from "../reactivity/ref";
 
-let currentInstace = null as any;
+let currentInstace = null as ComponentInstance | null;
 
 // 创建一个组件的实例对象
 export function createComponentInstall(vnode: VNode, parent: ComponentInstance) {
@@ -23,7 +23,8 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 		provides: parent?.provides ? parent.provides : {},
 		parent,
 		_subTree: null,
-		updatedComponent: null
+		updatedComponent: null,
+		activity: {}
 	};
 
 	instace.emit = emit;
@@ -115,11 +116,22 @@ export function createContent(install: ComponentInstance) {
 	);
 }
 
-export function onMounted(callback: Function) {
-	addInstaceMap(currentInstace);
-	currentInstace.mounted = callback;
+export function onBeforeMountd(fn: Function) {
+	currentInstace!.activity.onBeforeMountd = fn;
 }
 
+export function onMounted(callback: Function) {
+	addInstaceMap(currentInstace!);
+	currentInstace!.activity.onMounted = callback;
+}
 export function getCurrentInstace() {
-	return currentInstace;
+	return currentInstace!;
+}
+// 组件即将更新
+export function onBeforeUpdate(fn?: Function) {
+	currentInstace!.activity.onBeforeUpdate = fn;
+}
+// 组件更新
+export function onUpdated(fn?: Function) {
+	currentInstace!.activity.onUpdated = fn;
 }
