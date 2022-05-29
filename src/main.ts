@@ -1,8 +1,17 @@
 import { App } from "./App";
-import { baseParse } from "./compiler-core/pares";
+import { pares } from "./compiler-core/pares";
 import { createApp } from "./runtime-core/index";
-import { getSequence } from "./utils/getSequence";
 
 createApp(App).mount("#app");
 
-console.log(baseParse("{{ message }}<div></div>"));
+console.log(
+	pares(`<div>
+            <p>
+                测试下 {{ msg }}
+            </p>
+            今天情况是 -> {{ str }} ,我的心情是 -> {{ mood }} 出去玩咯
+            <div>
+                哈哈哈
+            </div>
+        </div>`)
+);
