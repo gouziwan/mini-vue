@@ -1,6 +1,6 @@
 // 正则表达式
 // 解析插值语法的
-import { interpolationRxg, startTagRxg, endTagRxg, TextRxg, TextsRxg, searchTag } from "./Regex";
+import { startTagRxg, endTagRxg, TextRxg, TextsRxg, searchTag, attrsRxg } from "./Regex";
 import { emun } from "./emun";
 
 interface ContentTemplate {
@@ -46,9 +46,7 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 	if (template.socucs.length <= 0) {
 		return;
 	}
-
 	const s = template.socucs;
-
 	// 解析开始标签的
 	if (startTagRxg.test(s)) {
 		startTag(stact, template);
@@ -61,10 +59,18 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 
 // 解析头部标签的时候
 function startTag(stact: ChildrenNodes[], template: ContentTemplate) {
-	const arr = template.socucs.match(startTagRxg);
-	stact.push(createNodes(emun.Element, arr![1], [], []));
+	const arr = template.socucs.match(startTagRxg)!;
+	stact.push(createNodes(emun.Element, arr[1], [], []));
 
-	const len = arr![0].length;
+	const len = arr[0].length;
+
+	let attr = arr[0].match(attrsRxg);
+
+	if (attr !== null && attr.length > 1) {
+		paresAttrs(stact, attr.slice(1, attr.length));
+	}
+
+	// 解析里面的属性
 
 	template.socucs = template.socucs.slice(len);
 
@@ -74,7 +80,6 @@ function startTag(stact: ChildrenNodes[], template: ContentTemplate) {
 // 碰到结束标签的时候
 function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 	const arr = template.socucs.match(endTagRxg)!;
-
 	// 弹出最后一个
 	const tag = stact[stact.length - 1].tag;
 	if (arr[1] === tag) {
@@ -95,29 +100,22 @@ function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 // 解析文字模板
 function paresText(stact: ChildrenNodes[], template: ContentTemplate) {
 	let text = template.socucs.match(TextRxg)![1];
+
 	// 需要判断有没有插值语法的
 	const arrText: any[] = [];
-
 	let nums = text.search(searchTag);
-
 	if (nums !== -1) {
 		text = text.slice(0, nums);
 	}
-
 	let len = nums === -1 ? text.length : nums;
-
 	if (TextsRxg.test(text)) {
 		paresInterpolation(arrText, text);
 	} else {
 		arrText.push(text);
 	}
-
 	const textNode = createNodes(emun.Text, "", arrText, null);
-
 	stact[stact.length - 1].children.push(textNode);
-
 	template.socucs = template.socucs.slice(len);
-
 	return parestemplate(stact, template);
 }
 
@@ -139,12 +137,21 @@ function paresInterpolation(arr: any, text: string) {
 				.trim();
 
 			arr.push({
+				type: "interpolation",
 				value: interpolation
 			});
-
 			text = text.slice(end + 2);
 		}
 		currentIndex++;
+	}
+}
+
+// 解析文本里面的属性
+function paresAttrs(stact: any, attrs: any) {
+	console.log(stact, attrs);
+
+	for (let i = 0; i < attrs.length; i++) {
+		let str = attrs[i];
 	}
 }
 
