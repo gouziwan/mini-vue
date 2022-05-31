@@ -4,8 +4,6 @@ import { createApp } from "./runtime-core/index";
 
 // createApp(App).mount("#app");
 
-// console.dir(pares(document.querySelector<HTMLDivElement>("#app")!.innerHTML));
-
 console.log(
 	pares(`
         <div id="app" :class="appage" :id="class" @onClick="age" age-name> 
