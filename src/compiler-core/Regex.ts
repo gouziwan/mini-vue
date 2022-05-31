@@ -1,8 +1,8 @@
 export let interpolationRxg = /^\{\{(.+)\}\}/;
 
-export let startTagRxg = /^<(\w+)(\s*(:?|v-bind:?|@)(\w+-\w+?)?=?"?(\w+)?"?)+?\/?>/;
+export let startTagRxg = /^<(\w+(-\w+)?)((\s*(:|@|#)?(\w+-?\w+?)(=?"?(.+)"?)?))*\/?>/;
 
-export let endTagRxg = /^<\/(\w+)>/;
+export let endTagRxg = /^<\/(\w+(-\w+)?)>/;
 
 export let TextRxg = /^(.*)\s*\<\/?[\s\S]+\>/;
 
@@ -12,4 +12,4 @@ export let TextsRxg = /(\{\{.+\}\})/;
 // 这里是用于搜索文本中的字符串的
 export let searchTag = /(<\w+>)|(<\/\w+>)/;
 
-export let attrsRxg = /(:|v-bind:|@)?(\w+-?\w+)(="(\w+)?")?/g;
+export let attrsRxg = /(:|@|#)?(\w+-?\w+)(="(.*?)")?/g;

@@ -1,7 +1,7 @@
 // 正则表达式
 // 解析插值语法的
 import { startTagRxg, endTagRxg, TextRxg, TextsRxg, searchTag, attrsRxg } from "./Regex";
-import { emun } from "./emun";
+import { closedTag, emun } from "./emun";
 
 interface ContentTemplate {
 	socucs: string;
@@ -12,6 +12,7 @@ interface ChildrenNodes {
 	tag: string;
 	children: any[];
 	attrs?: any[] | null;
+	slot?: any;
 }
 
 export function pares(template: string) {
@@ -20,9 +21,7 @@ export function pares(template: string) {
 	let stack: ChildrenNodes[] = [];
 
 	parestemplate(stack, createContent(template));
-
 	// 这里执行完毕
-
 	return stack[0];
 }
 
@@ -38,6 +37,8 @@ function createContent(template: string): ContentTemplate {
 	};
 }
 
+let count = 0;
+
 // 解析parestemplate模板的
 function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 	// 去掉2边的空格
@@ -48,6 +49,7 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 	}
 	const s = template.socucs;
 	// 解析开始标签的
+
 	if (startTagRxg.test(s)) {
 		startTag(stact, template);
 	} else if (endTagRxg.test(s)) {
@@ -60,18 +62,27 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 // 解析头部标签的时候
 function startTag(stact: ChildrenNodes[], template: ContentTemplate) {
 	const arr = template.socucs.match(startTagRxg)!;
-	stact.push(createNodes(emun.Element, arr[1], [], []));
+
+	let tag = arr[1];
+
+	const node = createNodes(emun.Element, tag, [], []);
+
+	if (closedTag[tag] || arr[0].lastIndexOf("/") !== -1) {
+		stact[stact.length - 1] == null
+			? stact.push(node)
+			: stact[stact.length - 1].children.push(node);
+	} else {
+		stact.push(node);
+	}
 
 	const len = arr[0].length;
 
 	let attr = arr[0].match(attrsRxg);
 
 	if (attr !== null && attr.length > 1) {
-		paresAttrs(stact, attr.slice(1, attr.length));
+		paresAttrs(node, attr, tag);
 	}
-
 	// 解析里面的属性
-
 	template.socucs = template.socucs.slice(len);
 
 	return parestemplate(stact, template);
@@ -93,14 +104,13 @@ function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 			return parestemplate(stact, template);
 		}
 	} else {
-		throw new Error(`模板解析失败`);
+		throw new Error(`模板解析失败 end模板是=>${arr[1]} strte模板=>${tag}`);
 	}
 }
 
 // 解析文字模板
 function paresText(stact: ChildrenNodes[], template: ContentTemplate) {
 	let text = template.socucs.match(TextRxg)![1];
-
 	// 需要判断有没有插值语法的
 	const arrText: any[] = [];
 	let nums = text.search(searchTag);
@@ -108,14 +118,18 @@ function paresText(stact: ChildrenNodes[], template: ContentTemplate) {
 		text = text.slice(0, nums);
 	}
 	let len = nums === -1 ? text.length : nums;
+
 	if (TextsRxg.test(text)) {
 		paresInterpolation(arrText, text);
 	} else {
 		arrText.push(text);
 	}
 	const textNode = createNodes(emun.Text, "", arrText, null);
+
 	stact[stact.length - 1].children.push(textNode);
+
 	template.socucs = template.socucs.slice(len);
+
 	return parestemplate(stact, template);
 }
 
@@ -147,24 +161,61 @@ function paresInterpolation(arr: any, text: string) {
 }
 
 // 解析文本里面的属性
-function paresAttrs(stact: any, attrs: any) {
-	console.log(stact, attrs);
+function paresAttrs(node: ChildrenNodes, attrs: any, tag: string) {
+	let arr: any[] = [];
 
 	for (let i = 0; i < attrs.length; i++) {
-		let str = attrs[i];
+		let req = /^(:|@)/;
+
+		let slotReq = /^#/;
+
+		let [name, value] = attrs[i].split("=");
+
+		if (name === tag) {
+			// 标签跳过
+			continue;
+		}
+
+		if (req.test(name)) {
+			let attNode = createdAttrs(
+				name.replace(req, ""),
+				value === undefined ? true : value.replace(/\"/g, "")
+			);
+			arr.push(attNode);
+		} else if (slotReq.test(name)) {
+			name = name.replace(slotReq, "");
+			node.slot = name;
+		} else {
+			// 普通的属性
+			let attNode = createdAttrs(name, value);
+			arr.push(attNode);
+		}
 	}
+
+	node.attrs = arr;
+
+	return arr;
 }
 
 function createNodes(
 	type: string,
 	tag: string,
 	children: any[],
-	attrs?: any[] | null
+	attrs?: any[] | null,
+	slot?: any
 ): ChildrenNodes {
 	return {
 		type,
 		tag,
 		children,
-		attrs
+		attrs,
+		slot
+	};
+}
+
+function createdAttrs(name: string, value: string) {
+	return {
+		name,
+		value: value === undefined ? true : value
 	};
 }
