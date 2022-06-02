@@ -3,18 +3,6 @@
 import { startTagRxg, endTagRxg, TextRxg, TextsRxg, searchTag, attrsRxg } from "./Regex";
 import { closedTag, emun } from "./emun";
 
-interface ContentTemplate {
-	socucs: string;
-}
-
-interface ChildrenNodes {
-	type: string;
-	tag: string;
-	children: any[];
-	attrs?: any[] | null;
-	slot?: any;
-}
-
 export function pares(template: string) {
 	// 创建一个栈的东西
 	// 用于记录闭合标签就合并
@@ -36,8 +24,6 @@ function createContent(template: string): ContentTemplate {
 		socucs: template
 	};
 }
-
-let count = 0;
 
 // 解析parestemplate模板的
 function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {

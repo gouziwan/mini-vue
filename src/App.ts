@@ -1,99 +1,63 @@
 import { ref } from "./reactivity/ref";
-import {
-	h,
-	getCurrentInstace,
-	onBeforeUpdate,
-	onUpdated,
-	onBeforeMountd
-} from "./runtime-core/index";
-const App: Component = {
+
+export const App: Component = {
 	name: "App",
 	setup() {
-		const msg = ref("App消息");
-
-		const instace = getCurrentInstace();
-
-		const onClick = () => {
-			msg.value = "更新后的App消息";
-		};
-
-		const count = ref(0);
-
-		const onClickAdd = () => {
-			++count.value;
-		};
-
-		const nums = ref(0);
-
-		const onClickNums = () => {
-			for (let i = 0; i < 99; i++) {
-				nums.value = i;
-			}
-		};
-
-		onBeforeMountd(() => {
-			console.log(`组件即将挂载但是`, instace.state.msg, document.querySelector(".nums"));
-		});
-
-		onBeforeUpdate(() => {
-			console.log(`组件即将更新的值`, msg.value, document.querySelector(".nums")?.innerHTML);
-		});
-
-		onUpdated(() => {
-			console.log(`组件更新后的值`, instace.state.msg, document.querySelector(".nums")?.innerHTML);
-		});
+		const msg = (window.s = ref("哈哈哈"));
 
 		return {
-			msg,
-			onClick,
-			count,
-			onClickAdd,
-			onClickNums,
-			nums
+			msg: msg
 		};
 	},
-	render() {
-		return h("div", {}, [
-			h(Childern, { msg: this.msg, count: this.count }),
-			h(
-				"button",
-				{
-					onClick: this.onClick
-				},
-				"点击更新子组件"
-			),
-			h(
-				"button",
-				{
-					onClick: this.onClickAdd
-				},
-				"点击count++"
-			),
-			h("p", {}, `${this.count}`),
-			h(
-				"button",
-				{
-					onClick: this.onClickNums
-				},
-				"nums++"
-			),
-			h("p", { class: "nums" }, `${this.nums}`)
-		]);
-	}
-};
+	template: `
+        <div>
+            <MyInput>
+                <template #name>
+                    <div>我是插槽name</div>
+                </template>
+            </MyInput>
+            今天天气真好 {{ msg }}
+        </div>
+    `,
+	component: {
+		MyInput: {
+			name: "MyInput",
 
-const Childern: Component = {
-	name: "Childern",
-	props: ["msg"],
-	render() {
-		return h(
-			"div",
-			{
-				count: this.$attr.count
+			setup() {
+				const txt = (window.txt = ref("修改信息"));
+
+				return {
+					txt
+				};
 			},
-			`hello world - childer msg ->${this.$props.msg}`
-		);
+
+			template: `
+                <div>
+                    <div>我是MyInput组件 => {{ txt }}</div>
+                    <slot v-slot="name"></slot>
+                </div>
+            `
+		},
+		name: "MyInput"
 	}
 };
 
-export { App };
+// import { ref } from "./reactivity/ref";
+// import { h } from "./runtime-core";
+
+// export const App: Component = {
+// 	name: "App",
+// 	setup() {
+// 		const msg = (window.s = ref("hello"));
+
+// 		const boolean = (window.sw = ref(false));
+
+// 		return {
+// 			msg: msg,
+// 			boolean
+// 		};
+// 	},
+// 	render() {
+// 		return h("div", {}, [h("", {}, this.msg), h("div", {}, "66")]);
+// 	}
+// };

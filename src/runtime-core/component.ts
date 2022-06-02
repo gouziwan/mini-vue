@@ -5,6 +5,8 @@ import { emit } from "./componentEmit";
 import { initSlost } from "./componentsSlost";
 import { addInstaceMap } from "./createApp";
 import { proxyRefs } from "../reactivity/ref";
+import { pares } from "../compiler-core/pares";
+import { transition } from "../compiler-dom/transition";
 
 let currentInstace = null as ComponentInstance | null;
 
@@ -24,7 +26,8 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 		parent,
 		_subTree: null,
 		updatedComponent: null,
-		activity: {}
+		activity: {},
+		_components: typeof vnode.type === "string" ? {} : vnode.type.component
 	};
 
 	instace.emit = emit;
@@ -34,11 +37,13 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 
 // 这个函数是初始化 setupComponent函数
 export function setupComponent(instace: ComponentInstance) {
+	currentInstace = instace;
 	// 初始化props
 	initProps(instace);
 	// 初始化插槽
 	initSlost(instace);
 	setupStateComponent(instace);
+	currentInstace = null;
 }
 
 // 初始化props
@@ -62,7 +67,6 @@ export function setupStateComponent(instace: ComponentInstance) {
 // 这个是处理 setup 不同的形式的 比如 return 可以是一个object 也可以是一个函数
 export function handleSetupResult(instace: ComponentInstance) {
 	if (isObject(instace)) {
-		currentInstace = instace;
 		// setup里面还传递props 但是现在这里先不做处理
 		let state = instace._component.setup(instace.props, {
 			emit: instace.emit(instace),
@@ -73,7 +77,6 @@ export function handleSetupResult(instace: ComponentInstance) {
 			state = {};
 		}
 		instace.state = proxyRefs(state);
-		currentInstace = null;
 	}
 }
 
@@ -82,6 +85,9 @@ export function finishComponentSetup(instace: ComponentInstance) {
 	if (!instace._render) {
 		if (instace._component.render) {
 			instace._render = instace._component.render;
+		} else if (instace._component.template) {
+			let ast = pares(instace._component.template);
+			instace._render = transition(ast);
 		} else {
 			throw new Error("组件缺少render函数");
 		}
@@ -93,7 +99,8 @@ export function createContent(install: ComponentInstance) {
 		$el: (install: ComponentInstance) => install.$el,
 		$slots: (install: ComponentInstance) => install.$slots,
 		$attr: (install: ComponentInstance) => install.attr,
-		$props: (install: ComponentInstance) => install.props
+		$props: (install: ComponentInstance) => install.props,
+		$instace: (install: ComponentInstance) => install
 	};
 
 	return new Proxy(
