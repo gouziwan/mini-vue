@@ -74,6 +74,7 @@ function setupRenderEffect(
 			// 说明没挂载
 			if (instace._subTree == null) {
 				const subTree = (instace._subTree = instace._render!.call(_ctx));
+
 				// 执行
 				instace.activity.onBeforeMountd && instace.activity.onBeforeMountd();
 				// render函数重新得到的虚拟dom节点再重新执行 patch函数
@@ -332,6 +333,11 @@ function mountElement(
 	parent: ComponentInstance,
 	anchor: HTMLDivElement
 ) {
+	if (vnode.type === "template") {
+		vnode.children.forEach((v: any) => patch(null, v, container, parent, anchor));
+		return;
+	}
+
 	if (isArray(vnode)) {
 		vnode?.forEach((vnode: any) => patch(null, vnode, container, parent, anchor));
 		return;
@@ -345,13 +351,13 @@ function mountElement(
 	}
 
 	let element = document.createElement(type as string) as HTMLDivElement;
-	// 初始化挂载props 挂载子节点
 
-	if (isString(children)) {
+	// 初始化挂载props 挂载子节点
+	if (isArray(children)) {
+		children?.forEach((vnode: any) => patch(null, vnode, element, parent, anchor));
+	} else if (isString(children + "")) {
 		// 是不是字符串
 		vnode.el = setChilderText(element!, children as unknown as string);
-	} else if (isArray(children)) {
-		children?.forEach((vnode: any) => patch(null, vnode, element, parent, anchor));
 	}
 	// 挂载属性
 	if (isObject(props)) {

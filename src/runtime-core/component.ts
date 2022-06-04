@@ -40,6 +40,7 @@ export function setupComponent(instace: ComponentInstance) {
 	currentInstace = instace;
 	// 初始化props
 	initProps(instace);
+
 	// 初始化插槽
 	initSlost(instace);
 	setupStateComponent(instace);

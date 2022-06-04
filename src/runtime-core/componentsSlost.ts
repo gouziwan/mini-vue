@@ -7,8 +7,6 @@ export function initSlost(instace: ComponentInstance) {
 	let slost = instace._vnode.children!;
 
 	for (let k in slost) {
-		if (isFunction(slost[k])) {
-			instace.$slots[k] = slost[k];
-		}
+		instace.$slots[k] = slost[k];
 	}
 }

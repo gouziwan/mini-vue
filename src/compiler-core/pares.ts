@@ -195,7 +195,8 @@ function createNodes(
 		tag,
 		children,
 		attrs,
-		slot
+		slot,
+		_isVnode: false
 	};
 }
 

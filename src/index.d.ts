@@ -79,6 +79,7 @@ interface ContentTemplate {
 }
 
 interface ChildrenNodes {
+	_isVnode: any;
 	type: string;
 	tag: string;
 	children: any[];

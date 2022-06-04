@@ -10,7 +10,8 @@ export function createVNode(
 		children,
 		el: null,
 		key: props?.key,
-		_install: null
+		_install: null,
+		_isVnode: true
 	};
 
 	return vnode;
@@ -22,5 +23,6 @@ export function h(type: Component | string, props?: ComponentProps, children?: a
 		children = props;
 		props = undefined;
 	}
+
 	return createVNode(type, props, children);
 }
