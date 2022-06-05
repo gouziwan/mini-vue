@@ -1,7 +1,10 @@
+import { extend, isObject } from "./../utils/index";
 import { render } from "./render";
-import { createVNode } from "./vnode";
+import { createVNode, h } from "./vnode";
 
 let instaceMap = [] as ComponentInstance[];
+// 全局注册组件
+export let globalComponents = new Map<string, Component>();
 
 export function createApp(rootComponents: Component) {
 	return {
@@ -11,8 +14,16 @@ export function createApp(rootComponents: Component) {
 			render(vnode, getElementNode(rootConents), null!, undefined);
 			// 执行生命周期
 			execInstaceOnMouted();
-		}
+		},
+		config: {
+			comments: globalComponents
+		},
+		components: registerComponents
 	};
+}
+
+function registerComponents(key: string, components: Component) {
+	globalComponents.set(key, components);
 }
 
 function getElementNode(el: string | HTMLDivElement) {
@@ -31,3 +42,18 @@ export function execInstaceOnMouted() {
 		instace?.activity.onMounted && instace?.activity.onMounted!();
 	}
 }
+
+// 内置组件
+globalComponents.set("components", {
+	props: ["is"],
+	setup(props, { attr }) {
+		return {};
+	},
+	render() {
+		const component = isObject(this.$props.is)
+			? this.$props.is
+			: globalComponents.get(this.$props.is);
+
+		return h("template", {}, [h(component, this.$attr)]);
+	}
+});

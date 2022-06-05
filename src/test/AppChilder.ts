@@ -1,5 +1,5 @@
 import { ref } from "../reactivity/ref";
-import { h } from "../runtime-core";
+import { h } from "../runtime-core/Vue/Vue/Vue";
 
 //1.左侧对比
 // const prevChildren = [

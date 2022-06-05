@@ -9,6 +9,16 @@ import {
 } from "./component";
 import { inject, provide } from "./injecct";
 import { nextTick } from "../utils/queue";
+import { watchEffect } from "../reactivity/effect";
+import { ref } from "../reactivity/ref";
+import {
+	reactive,
+	readonly,
+	isReactive,
+	isReadonly,
+	shallowReadonly,
+	isProxy
+} from "../reactivity/reactive";
 
 export {
 	createApp,
@@ -20,5 +30,13 @@ export {
 	nextTick,
 	onBeforeUpdate,
 	onUpdated,
-	onBeforeMountd
+	onBeforeMountd,
+	watchEffect,
+	ref,
+	reactive,
+	readonly,
+	isReactive,
+	isReadonly,
+	shallowReadonly,
+	isProxy
 };

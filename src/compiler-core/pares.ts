@@ -1,7 +1,15 @@
 // 正则表达式
 // 解析插值语法的
 import { startTagRxg, endTagRxg, TextRxg, TextsRxg, searchTag, attrsRxg } from "./Regex";
+
 import { closedTag, emun } from "./emun";
+import { camelize, capitalize, toCapitalizeisOn } from "../utils";
+
+let req = /^(:)/;
+
+let event = /^(@)/;
+
+let slotReq = /^#/;
 
 export function pares(template: string) {
 	// 创建一个栈的东西
@@ -10,13 +18,8 @@ export function pares(template: string) {
 
 	parestemplate(stack, createContent(template));
 	// 这里执行完毕
-	return stack[0];
-}
 
-function createrRoot(children: ChildrenNodes[]) {
-	return {
-		children
-	};
+	return stack[0];
 }
 
 function createContent(template: string): ContentTemplate {
@@ -35,7 +38,6 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 	}
 	const s = template.socucs;
 	// 解析开始标签的
-
 	if (startTagRxg.test(s)) {
 		startTag(stact, template);
 	} else if (endTagRxg.test(s)) {
@@ -151,10 +153,6 @@ function paresAttrs(node: ChildrenNodes, attrs: any, tag: string) {
 	let arr: any[] = [];
 
 	for (let i = 0; i < attrs.length; i++) {
-		let req = /^(:|@)/;
-
-		let slotReq = /^#/;
-
 		let [name, value] = attrs[i].split("=");
 
 		if (name === tag) {
@@ -163,11 +161,11 @@ function paresAttrs(node: ChildrenNodes, attrs: any, tag: string) {
 		}
 
 		if (req.test(name)) {
-			let attNode = createdAttrs(
-				name.replace(req, ""),
-				value === undefined ? true : value.replace(/\"/g, "")
-			);
+			let attNode = createdAttrs(name, value === undefined ? true : value.replace(/\"/g, ""));
 			arr.push(attNode);
+		} else if (event.test(name)) {
+			let evnetNode = createdEvenet(name, value);
+			arr.push(evnetNode);
 		} else if (slotReq.test(name)) {
 			name = name.replace(slotReq, "");
 			node.slot = name;
@@ -202,7 +200,16 @@ function createNodes(
 
 function createdAttrs(name: string, value: string) {
 	return {
-		name,
+		name: name.replace(req, ""),
 		value: value === undefined ? true : value
+	};
+}
+
+function createdEvenet(name: string, value: any) {
+	name = toCapitalizeisOn(camelize(name.replace(event, "")));
+
+	return {
+		name,
+		value: value.replace(/\"/g, "")
 	};
 }

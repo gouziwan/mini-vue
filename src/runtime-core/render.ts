@@ -101,7 +101,6 @@ function setupRenderEffect(
 
 function updateComponent(n1: VNode, n2: VNode) {
 	n2._install = n1._install;
-
 	if (isUpdateComponets(n1, n2)) {
 		const { _install } = n2;
 		_install!._vnode = n2;
@@ -280,7 +279,7 @@ function patchArrayChildren(
 			let key = chi1[i].key;
 			// 如果有那就设置
 			currentIndex = map.get(key);
-			if (currentIndex != undefined) {
+			if (currentIndex != undefined && isNodesAreEqual(chi2[currentIndex], chi1[i])) {
 				// 这个是记录节点的用户找到我们中的最长递增子序列
 				// 这里i + 1 -> 是一个特殊的关系的 如果他为 0 那么 他就是 需要创建的节点
 				if (currentIndex >= max) {
@@ -291,7 +290,13 @@ function patchArrayChildren(
 				newIndexToOldIndexMap[currentIndex - s2] = i + 1;
 				patch(chi1[i], chi2[currentIndex], container, parent, null!);
 			} else {
-				unmountChildenr([chi1[i]]);
+				// 如果 新旧都是组件把之前的组件给卸载掉
+				if (isObject(chi1[i].type)) {
+					container = chi1[i]._install.$el.parentNode;
+					unmountComponents(chi1[i]);
+				} else {
+					unmountChildenr([chi1[i]]);
+				}
 				continue;
 			}
 		}
@@ -307,12 +312,15 @@ function patchArrayChildren(
 			const nextChid = chi2[next].el;
 			// 这个是锚点 就是 当前的节点下一个节点 他可能是 null -> 就是往后面插入
 			const anchor = next + 1 <= chi2.length - 1 ? chi2[next + 1].el : null;
+
 			if (newIndexToOldIndexMap[i] === 0) {
 				patch(null, chi2[next], container, parent, anchor);
 			} else {
 				// 如果当前的 i 不等于最长递增子序列的值的话 -> 就说明当前的节点是需要去移动的
 				if (i !== increasingNewIndexSequence[j]) {
-					insert(nextChid, container, anchor);
+					if (nextChid != null && container != null) {
+						insert(nextChid, container, anchor);
+					}
 				} else {
 					// 不需要去移动
 					// 指针--
@@ -407,6 +415,14 @@ function unmountChildenr(children: any) {
 		fragment.appendChild(el);
 	}
 	fragment = null;
+}
+
+function unmountComponents(n1: VNode) {
+	// 先执行生命周期 n1
+	let fragment = document.createDocumentFragment();
+	const el = n1._install?.$el;
+	fragment.appendChild(el!);
+	n1._install = null;
 }
 
 function insert(children: HTMLDivElement, parent: HTMLDivElement, anchor: null | HTMLDivElement) {

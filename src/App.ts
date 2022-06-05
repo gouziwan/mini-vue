@@ -1,6 +1,4 @@
-import { ref } from "./reactivity/ref";
-
-import { provide, inject } from "./runtime-core/injecct";
+import { getCurrentInstace, h, inject, provide, ref, watchEffect } from "./runtime-core/Vue";
 
 export const App: Component = {
 	name: "App",
@@ -11,39 +9,85 @@ export const App: Component = {
 
 		provide("name", name);
 
+		const count = ref(0);
+
+		const App = "app";
+
+		const onClick = () => {
+			count.value++;
+		};
+
+		const components = ref("MyButton");
+
+		function onSwiper() {
+			components.value = "MyTree";
+		}
+
+		window.ref = onSwiper;
+
 		return {
 			msg: msg,
-			name
+			name,
+			App,
+			count,
+			onClick,
+			components,
+			onSwiper
 		};
 	},
 	template: `
-        <div>
-            <MyInput name="123">
-                <div data="data"> 
-					我是默认插槽 
+		<div id="App" :class="App" :index-value="count">
+			<MyInput :age="count">
+					<div>我是默认插槽</div>
+					<template #name>
+						<div>我是插槽{{ name }}</div> 
+					</template>
+				</MyInput>
+				今天天气真好 {{ msg }}
+				<button @click="onClick">
+					按钮事件
+				</button>
+				<div>
+					{{ count }}
 				</div>
-				<template #name>
-				 	<div>我是插槽 {{ name }} </div> 
-				</template>
-            </MyInput>
-            今天天气真好 {{ msg }}
+				<div style="margin-top:100px">
+					<h2>新的测试全局组件</h2>	
+					<p>
+						<button @click="onSwiper">点击切换组件</button>
+					</p>
+					<components :is="components" :name="msg" />
+				</div>
         </div>
-    `,
+	`,
 	component: {
 		MyInput: {
 			name: "MyInput",
+			props: ["age"],
+			setup(props) {
+				const instace = getCurrentInstace();
 
-			setup() {
 				const txt = (window.txt = ref("修改信息"));
 
 				const name = inject("name");
 
 				const data = ref(`子组件传的msg`);
 
+				const count = ref(0);
+
+				watchEffect(() => {
+					count.value = props.age;
+				});
+
+				const onClick = () => {
+					props.age++;
+				};
+
 				return {
 					txt,
 					name,
-					data
+					data,
+					count,
+					onClick
 				};
 			},
 
@@ -54,6 +98,9 @@ export const App: Component = {
 						<slot v-slot="name"></slot>
 					</MyChildren>
 					<slot></slot>
+					<div @click="onClick">
+						计数器:=> {{ count }}
+					</div>
                 </div>
             `,
 			component: {
@@ -63,9 +110,9 @@ export const App: Component = {
 						return {};
 					},
 					template: `
-					<div name="my-children">
+					<div>
 						<slot>
-
+							<div>如果没有插槽则单独显示这个插槽</div>
 						</slot>	
 					</div>
 				`
@@ -74,10 +121,6 @@ export const App: Component = {
 		}
 	}
 };
-
-import { ref } from "./reactivity/ref";
-
-import { h } from "./runtime-core";
 
 export const AppChiren: Component = {
 	render() {
@@ -92,14 +135,25 @@ export const Apps: Component = {
 
 		const boolean = (window.sw = ref(false));
 
+		const onClick = () => {
+			console.log(msg);
+		};
+
 		return {
 			msg: msg,
-			boolean
+			boolean,
+			onClick
 		};
 	},
 	render() {
 		return h("div", {}, [
-			h("div", {}, "666"),
+			h(
+				"div",
+				{
+					onClick: this.onClick
+				},
+				"666"
+			),
 			h(
 				AppChiren,
 				{},

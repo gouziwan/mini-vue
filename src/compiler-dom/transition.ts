@@ -1,6 +1,9 @@
 import { extend, isArray, isFunction, isObject } from "./../utils/index";
 import { h } from "../runtime-core/vnode";
-import { getCurrentInstace } from "../runtime-core";
+import { getCurrentInstace } from "../runtime-core/Vue";
+import { TagMap } from "../eumn/tag";
+
+import { globalComponents } from "../runtime-core/createApp";
 
 const elementTag = {
 	slot: "slot"
@@ -56,20 +59,50 @@ export function generate(this: any, $vm: ComponentInstance, ast: ChildrenNodes) 
 // 这个创建 返回是一个标签还是一个组件
 export function _createElement(tag: string, $vm: ComponentInstance) {
 	const { _components } = $vm;
-
-	if (_components && _components[tag]) {
+	tag = tag.trim();
+	// 是不是标签
+	if (TagMap[tag as keyof typeof TagMap] === true) {
+		return tag;
+	} else if (_components[tag]) {
 		return _components[tag];
+	} else if (globalComponents.has(tag)) {
+		return globalComponents.get(tag);
 	} else {
 		return tag;
 	}
 }
 
-function _createProps(ast: ChildrenNodes, $vm: ComponentInstance) {
-	let props = {};
+function _createProps(
+	this: {
+		h: (type: string | Component, props?: ComponentProps | undefined, children?: any) => VNode;
+		_createElement: (tag: string, $vm: ComponentInstance) => any;
+		_createProps: (ast: ChildrenNodes, $vm: ComponentInstance) => { [x: string]: any };
+		_createChildern: (this: any, ast: ChildrenNodes, $vm: ComponentInstance) => any[];
+		_createSlot: (this: any, ast: ChildrenNodes, $vm: any) => any;
+		isComponents: (tag: string, $vm: ComponentInstance) => boolean;
+	},
+	ast: ChildrenNodes,
+	$vm: ComponentInstance
+) {
+	let props = {} as { [x: string]: any };
 
-	console.log(ast);
+	if (isArray(ast.attrs) && ast.attrs!.length <= 0) return props;
 
-	return;
+	for (let i = 0; i < ast.attrs!.length; i++) {
+		let { name, value } = ast.attrs![i];
+		// 区分属性还是
+		let req = /^\"(.+)\"$/;
+		// 普通的属性就是不需要获取变量的
+		if (req.test(value)) {
+			value = value.replace(req, (a: any, b: any) => b);
+			props[name] = value;
+		} else {
+			props[name] =
+				$vm.state[value] != undefined ? $vm.state[value] : renderStr.call(this, `${value}`);
+		}
+	}
+
+	return props;
 }
 
 // 创建 子节点
@@ -183,6 +216,8 @@ function withSlots(vnode: any, chi: any, $vm: ComponentInstance): VNode {
 
 	if ($vm.$slots["default"]) {
 		let children = $vm.$slots["default"];
+
+		if (children == undefined) return vnode;
 
 		if (isFunction(children)) {
 			children = children();

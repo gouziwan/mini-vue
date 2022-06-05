@@ -1,4 +1,4 @@
-import { isObject } from "./../utils/index";
+import { isObject, extend } from "./../utils/index";
 import { readonly } from "../reactivity/reactive";
 import { initProps } from "./componentProps";
 import { emit } from "./componentEmit";
@@ -39,8 +39,7 @@ export function createComponentInstall(vnode: VNode, parent: ComponentInstance) 
 export function setupComponent(instace: ComponentInstance) {
 	currentInstace = instace;
 	// 初始化props
-	initProps(instace);
-
+	extend(instace, initProps(instace));
 	// 初始化插槽
 	initSlost(instace);
 	setupStateComponent(instace);
@@ -69,7 +68,7 @@ export function setupStateComponent(instace: ComponentInstance) {
 export function handleSetupResult(instace: ComponentInstance) {
 	if (isObject(instace)) {
 		// setup里面还传递props 但是现在这里先不做处理
-		let state = instace._component.setup(instace.props, {
+		let state = instace._component.setup(readonly(instace.props), {
 			emit: instace.emit(instace),
 			attr: instace.attr
 		});

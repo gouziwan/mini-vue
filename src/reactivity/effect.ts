@@ -92,3 +92,7 @@ export function trigger(target: Object, key: string) {
 export function stop(fn: any) {
 	fn.effect.stop();
 }
+
+export function watchEffect(_fn: Function) {
+	effect(_fn);
+}

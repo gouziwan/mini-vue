@@ -1,6 +1,6 @@
 import Foo from "../component/Foo";
 import { ref } from "../reactivity/ref";
-import { h, provide, inject } from "../runtime-core";
+import { h, provide, inject } from "../runtime-core/Vue/Vue/Vue";
 
 const ArrayList: Component = {
 	name: "ArrayList",

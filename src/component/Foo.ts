@@ -1,4 +1,4 @@
-import { h, getCurrentInstace, inject } from "../runtime-core";
+import { h, getCurrentInstace, inject } from "../runtime-core/Vue/Vue/Vue";
 
 const Foo: Component = {
 	name: "Foo",

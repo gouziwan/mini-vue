@@ -1,17 +1,11 @@
-import { readonly } from "../reactivity/reactive";
-import { extend, isArray, isFunction, isKeyEvent, isObject } from "./../utils/index";
+import { reactive, readonly } from "../reactivity/reactive";
+import { isArray, isFunction, isKeyEvent, isObject } from "./../utils/index";
 
 export function initProps(instace: ComponentInstance) {
 	// 如果不存在 没必要循环
 	if (!instace._vnode.props) return;
 
-	const props = instace._vnode.props;
-
-	const parameter = isArray(instace._component.props)
-		? [...instace._component.props]
-		: isObject(instace._component.props)
-		? Object.keys(instace._component.props)
-		: [];
+	const parameter = getParameter(instace);
 
 	const data = {
 		on: {},
@@ -19,6 +13,25 @@ export function initProps(instace: ComponentInstance) {
 		attr: {}
 	};
 
+	withProps(data, parameter, instace);
+
+	// 设置为只读对象
+	data.props = reactive(data.props);
+
+	data.attr = reactive(data.attr);
+	return data;
+}
+
+function getParameter(instace: ComponentInstance) {
+	return isArray(instace._component.props)
+		? [...instace._component.props]
+		: isObject(instace._component.props)
+		? Object.keys(instace._component.props)
+		: [];
+}
+
+function withProps(data: any, parameter: any, instace: ComponentInstance) {
+	const props = instace._vnode.props!;
 	Object.keys(props).forEach(key => {
 		// 说明这个属性为props 属性
 		if (parameter.indexOf(key) !== -1) {
@@ -29,10 +42,6 @@ export function initProps(instace: ComponentInstance) {
 			disposeArtt(props, data, key);
 		}
 	});
-
-	// 设置为只读对象
-	data.props = readonly(data.props);
-	extend(instace, data);
 }
 
 function disposeProps(instace: any, data: any, key: string) {
@@ -68,7 +77,17 @@ function disposeArtt(props: any, data: any, key: string) {
 }
 
 export function updateProps(_install: ComponentInstance) {
-	initProps(_install);
+	const old = _install.props;
+
+	const newValue = _install._vnode.props!;
+
+	const parameter = getParameter(_install);
+
+	Object.keys(newValue).forEach(key => {
+		if (parameter.indexOf(key) !== -1 && old[key] !== newValue[key]) {
+			old[key] = newValue[key];
+		}
+	});
 }
 
 // 判断是否要更新组件主要是判断props的值

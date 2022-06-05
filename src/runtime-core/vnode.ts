@@ -1,4 +1,5 @@
 import { isString } from "./../utils/index";
+
 export function createVNode(
 	type: Component | string,
 	props?: ComponentProps,
