@@ -15,6 +15,8 @@ export function createVNode(
 		_isVnode: true
 	};
 
+	delete props?.key;
+
 	return vnode;
 }
 

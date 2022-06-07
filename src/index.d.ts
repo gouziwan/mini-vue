@@ -72,6 +72,8 @@ interface Activity {
 	onMounted?: Function;
 	onBeforeUpdate?: Function;
 	onUpdated?: Function;
+	onBeforeUninstall?: Function;
+	onUninstall?: Function;
 }
 
 interface ContentTemplate {
@@ -85,4 +87,13 @@ interface ChildrenNodes {
 	children: any[];
 	attrs?: any[] | null;
 	slot?: any;
+}
+
+interface Ten {
+	h: (type: string | Component, props?: ComponentProps | undefined, children?: any) => VNode;
+	_createElement: (tag: string, $vm: ComponentInstance) => any;
+	_createProps: (ast: ChildrenNodes, $vm: ComponentInstance) => { [x: string]: any };
+	_createChildern: (this: any, ast: ChildrenNodes, $vm: ComponentInstance) => any[];
+	_createSlot: (this: any, ast: ChildrenNodes, $vm: any) => any;
+	isComponents: (tag: string, $vm: ComponentInstance) => boolean;
 }

@@ -1,28 +1,31 @@
 import { App, Apps } from "./App";
-import { createApp } from "./runtime-core/Vue";
-
+import { createApp, onBeforeUninstall, ref, watchEffect } from "./runtime-core/Vue";
 const app = createApp(App);
 
 app.components("MyButton", {
-	props: ["name"],
+	props: ["count"],
 
 	setup(props) {
+		onBeforeUninstall(() => {
+			console.log(`组件将要卸载了此时dom还是可以获取的`, document.querySelector("#button"));
+		});
+
+		const count = ref(0);
+
 		return {
 			onClick: () => {
 				console.log(`点击测试`);
 			},
-			name: props.name
+			count
 		};
 	},
 
 	template: `
-        <button @click="onClick">
-            一个简单的dom 接受一个测试 属性 => {{ name }}
+        <button @click="onClick" id="button"> 
+            一个简单的dom 接受一个测试 属性 => {{ count }}
         </button>
         `
 });
-
-// console.log(app);
 
 app.components("MyTree", {
 	name: "MyTree",

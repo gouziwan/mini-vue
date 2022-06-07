@@ -9,54 +9,24 @@ export const App: Component = {
 
 		provide("name", name);
 
-		const count = ref(0);
+		const list = ref(["A", "B", "C", "D", "E"]);
 
-		const App = "app";
-
-		const onClick = () => {
-			count.value++;
+		const onClick = function () {
+			list.value.push("F");
 		};
-
-		const components = ref("MyButton");
-
-		function onSwiper() {
-			components.value = "MyTree";
-		}
-
-		window.ref = onSwiper;
 
 		return {
 			msg: msg,
-			name,
-			App,
-			count,
-			onClick,
-			components,
-			onSwiper
+			list,
+			onClick
 		};
 	},
 	template: `
-		<div id="App" :class="App" :index-value="count">
-			<MyInput :age="count">
-					<div>我是默认插槽</div>
-					<template #name>
-						<div>我是插槽{{ name }}</div> 
-					</template>
-				</MyInput>
-				今天天气真好 {{ msg }}
-				<button @click="onClick">
-					按钮事件
-				</button>
-				<div>
-					{{ count }}
-				</div>
-				<div style="margin-top:100px">
-					<h2>新的测试全局组件</h2>	
-					<p>
-						<button @click="onSwiper">点击切换组件</button>
-					</p>
-					<components :is="components" :name="msg" />
-				</div>
+		<div id="App">
+			<p v-for="(item,index) in list" :key="index">
+				{{ item }}
+			</p>
+			<button @click="onClick">点击添加新增数据</button>
         </div>
 	`,
 	component: {

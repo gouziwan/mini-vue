@@ -5,7 +5,8 @@ import {
 	getCurrentInstace,
 	onBeforeUpdate,
 	onUpdated,
-	onBeforeMountd
+	onBeforeMountd,
+	onBeforeUninstall
 } from "./component";
 import { inject, provide } from "./injecct";
 import { nextTick } from "../utils/queue";
@@ -38,5 +39,6 @@ export {
 	isReactive,
 	isReadonly,
 	shallowReadonly,
-	isProxy
+	isProxy,
+	onBeforeUninstall
 };

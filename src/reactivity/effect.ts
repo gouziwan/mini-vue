@@ -32,7 +32,7 @@ function clearEffect(effect: ReactiveEffect) {
 	});
 }
 
-const targetMap = new WeakMap();
+export const targetMap = new WeakMap();
 
 // 这里存储的是当前的运行的effect 函数这个收集依赖用的
 let currentEffect: ReactiveEffect | null = null;

@@ -142,3 +142,13 @@ export function onBeforeUpdate(fn?: Function) {
 export function onUpdated(fn?: Function) {
 	currentInstace!.activity.onUpdated = fn;
 }
+
+// 组件卸载 即将卸载
+export function onBeforeUninstall(fn: Function) {
+	currentInstace!.activity.onBeforeUninstall = fn;
+}
+
+// 组件卸载完成
+export function onUninstall(fn: Function) {
+	currentInstace!.activity.onUninstall = fn;
+}

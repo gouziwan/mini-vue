@@ -37,6 +37,7 @@ function parestemplate(stact: ChildrenNodes[], template: ContentTemplate) {
 		return;
 	}
 	const s = template.socucs;
+
 	// 解析开始标签的
 	if (startTagRxg.test(s)) {
 		startTag(stact, template);
@@ -67,7 +68,7 @@ function startTag(stact: ChildrenNodes[], template: ContentTemplate) {
 
 	let attr = arr[0].match(attrsRxg);
 
-	if (attr !== null && attr.length > 1) {
+	if (attr !== null && attr.length > 0) {
 		paresAttrs(node, attr, tag);
 	}
 	// 解析里面的属性
@@ -79,6 +80,7 @@ function startTag(stact: ChildrenNodes[], template: ContentTemplate) {
 // 碰到结束标签的时候
 function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 	const arr = template.socucs.match(endTagRxg)!;
+
 	// 弹出最后一个
 	const tag = stact[stact.length - 1].tag;
 	if (arr[1] === tag) {
@@ -112,6 +114,7 @@ function paresText(stact: ChildrenNodes[], template: ContentTemplate) {
 	} else {
 		arrText.push(text);
 	}
+
 	const textNode = createNodes(emun.Text, "", arrText, null);
 
 	stact[stact.length - 1].children.push(textNode);

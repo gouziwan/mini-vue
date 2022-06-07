@@ -419,9 +419,11 @@ function unmountChildenr(children: any) {
 
 function unmountComponents(n1: VNode) {
 	// 先执行生命周期 n1
+	n1._install?.activity.onBeforeUninstall && n1._install?.activity.onBeforeUninstall();
 	let fragment = document.createDocumentFragment();
 	const el = n1._install?.$el;
 	fragment.appendChild(el!);
+	n1._install?.activity.onUninstall && n1._install?.activity.onUninstall();
 	n1._install = null;
 }
 

@@ -72,24 +72,15 @@ export function _createElement(tag: string, $vm: ComponentInstance) {
 	}
 }
 
-function _createProps(
-	this: {
-		h: (type: string | Component, props?: ComponentProps | undefined, children?: any) => VNode;
-		_createElement: (tag: string, $vm: ComponentInstance) => any;
-		_createProps: (ast: ChildrenNodes, $vm: ComponentInstance) => { [x: string]: any };
-		_createChildern: (this: any, ast: ChildrenNodes, $vm: ComponentInstance) => any[];
-		_createSlot: (this: any, ast: ChildrenNodes, $vm: any) => any;
-		isComponents: (tag: string, $vm: ComponentInstance) => boolean;
-	},
-	ast: ChildrenNodes,
-	$vm: ComponentInstance
-) {
+function _createProps(this: Ten, ast: ChildrenNodes, $vm: ComponentInstance) {
 	let props = {} as { [x: string]: any };
 
 	if (isArray(ast.attrs) && ast.attrs!.length <= 0) return props;
 
 	for (let i = 0; i < ast.attrs!.length; i++) {
 		let { name, value } = ast.attrs![i];
+		if (name === "v-for") continue;
+
 		// 区分属性还是
 		let req = /^\"(.+)\"$/;
 		// 普通的属性就是不需要获取变量的
@@ -109,34 +100,49 @@ function _createProps(
 function _createChildern(this: any, ast: ChildrenNodes, $vm: ComponentInstance) {
 	if (!isArray(ast.children)) return [];
 
-	return ast.children.map(chi => {
-		// 这里可能是一个渲染过的虚拟dom 然后 直接返回不需要任何处理
-		if (chi._isVnode) {
-			return chi;
-		} else if (chi.type === "Text") {
-			return renderStr.call(this, `h('',null,${paresText(chi.children, $vm)})`);
-		} else if (chi.type === "Element") {
-			this.chi = chi;
-			this.isComponents = isComponents;
-			const vnode = renderStr.call(
-				this,
-				`h(_createElement.call(this,chi.tag,$vm),
+	const arr = ast.children
+		.map(chi => {
+			// 这里可能是一个渲染过的虚拟dom 然后 直接返回不需要任何处理
+			if (chi._isVnode) {
+				return chi;
+			} else if (chi.type === "Text") {
+				return renderStr.call(this, `h('',null,${paresText.call(this, chi.children, $vm)})`);
+			} else if (chi.type === "Element") {
+				this.chi = chi;
+				this.isComponents = isComponents;
+
+				const value = isvFor(chi.attrs);
+
+				if (!value) {
+					const vnode = renderStr.call(
+						this,
+						`h(_createElement.call(this,chi.tag,$vm),
 				_createProps.call(this,chi,$vm), 
 				isComponents(chi.tag,$vm) === false ? 
 				_createChildern.call(this,chi,$vm) : 
 				_createSlot.call(this,chi,$vm))`
-			);
+					);
+					return withSlots(vnode, chi, $vm);
+				} else {
+					return realizeInstruction.call(this, value, ast);
+				}
 
-			// 如果他是一个插槽的话就把
-			return withSlots(vnode, chi, $vm);
-		}
-	});
+				// 如果他是一个插槽的话就把
+			}
+		})
+		.flat();
+
+	return arr;
 }
 
 // 把 一个文本的数组给拼起来
-function paresText(chi: any, $vm: ComponentInstance) {
+function paresText(this: any, chi: any) {
 	if (isArray(chi)) {
-		return `'${chi.map((str: any) => (isObject(str) ? $vm.state[str.value] : str)).join("")}'`;
+		return `'${chi
+			.map((str: any) => {
+				return isObject(str) ? getValue.call(this, str.value) : str;
+			})
+			.join("")}'`;
 	} else {
 		return chi;
 	}
@@ -226,4 +232,62 @@ function withSlots(vnode: any, chi: any, $vm: ComponentInstance): VNode {
 		vnode.children = isArray(children) ? children : [children];
 	}
 	return vnode;
+}
+
+// 判断有没用 v-for这种改变数据结构的
+function isvFor(attrs: any) {
+	if (!isArray(attrs) && attrs.length <= 0) return false;
+
+	for (let i = 0; i < attrs.length; i++) {
+		const value = attrs[i];
+		if (value.name === "v-for") {
+			return attrs[i];
+		}
+	}
+}
+
+// v-for实现
+function realizeInstruction(this: any, value: any, ast: any) {
+	let val = value.value.replace(/^\"|\"$/g, "");
+	let req = /(.+)? in (.+)/;
+
+	let arr = val.match(req);
+
+	// 取出第一个列表就是item -> index
+	let item = arr[1];
+
+	item =
+		item.indexOf(",") === -1
+			? [item]
+			: item.split(",").map((el: string) => el.replace(/\(|\)/g, ""));
+
+	const [keys, i] = item;
+
+	const data = getValue.call(this, arr[2]);
+
+	if (isArray(data)) {
+		const arr = data.map((el: any, index: number) => {
+			this[keys] = el;
+			this[i] = index;
+
+			return renderStr.call(
+				this,
+				`h(_createElement.call(this,chi.tag,$vm),
+				_createProps.call(this,chi,$vm), 
+				isComponents(chi.tag,$vm) === false ? 
+				_createChildern.call(this,chi,$vm) : 
+				_createSlot.call(this,chi,$vm))`
+			);
+		});
+
+		return arr;
+	}
+
+	return [];
+}
+
+function getValue(this: any, value: string) {
+	return this.$vm.state[value] != undefined
+		? this.$vm.state[value]
+		: renderStr.call(this, `${value}`);
 }
