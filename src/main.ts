@@ -1,5 +1,8 @@
 import { App, Apps } from "./App";
 import { createApp, onBeforeUninstall, ref, watchEffect } from "./runtime-core/Vue";
+
+import { routers } from "./router";
+
 const app = createApp(App);
 
 app.components("MyButton", {
@@ -33,6 +36,8 @@ app.components("MyTree", {
         <div>切换组件的情况 当前组件 MyTree</div>
     `
 });
+
+app.use(routers);
 
 app.mount("#app");
 

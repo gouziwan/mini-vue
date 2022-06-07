@@ -3,6 +3,13 @@ type EffectScheduler = {
 	onStop?: Function;
 };
 
+interface CreateApp {
+	mount(rootConents: string | HTMLDivElement): void;
+	config: { comments: Map<string, Component> };
+	components: (key: string, components: Component) => CreateApp;
+	use: (this: CreateApp, value: any) => CreateApp;
+}
+
 interface Component {
 	name?: string;
 	render?: RenderType;
@@ -96,4 +103,15 @@ interface Ten {
 	_createChildern: (this: any, ast: ChildrenNodes, $vm: ComponentInstance) => any[];
 	_createSlot: (this: any, ast: ChildrenNodes, $vm: any) => any;
 	isComponents: (tag: string, $vm: ComponentInstance) => boolean;
+}
+
+interface RouterOptions {
+	history: any;
+	router: Router[];
+}
+
+interface Router {
+	name: string;
+	comments: Component;
+	path: "";
 }

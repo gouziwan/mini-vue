@@ -18,12 +18,16 @@ export function createApp(rootComponents: Component) {
 		config: {
 			comments: globalComponents
 		},
-		components: registerComponents
+
+		components: registerComponents,
+		use: VueUse
 	};
 }
 
-function registerComponents(key: string, components: Component) {
+function registerComponents(this: CreateApp, key: string, components: Component) {
 	globalComponents.set(key, components);
+
+	return this;
 }
 
 function getElementNode(el: string | HTMLDivElement) {
@@ -41,6 +45,15 @@ export function execInstaceOnMouted() {
 		let instace = instaceMap.pop();
 		instace?.activity.onMounted && instace?.activity.onMounted!();
 	}
+}
+
+function VueUse(this: CreateApp, value: any) {
+	if (value instanceof Function) {
+		value(this);
+	} else {
+		value.install(this);
+	}
+	return this;
 }
 
 // 内置组件

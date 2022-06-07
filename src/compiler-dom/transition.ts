@@ -68,6 +68,7 @@ export function _createElement(tag: string, $vm: ComponentInstance) {
 	} else if (globalComponents.has(tag)) {
 		return globalComponents.get(tag);
 	} else {
+		console.warn(`你是不是忘记注册组件了没有找到该组件的=> ${tag}`);
 		return tag;
 	}
 }
@@ -106,7 +107,7 @@ function _createChildern(this: any, ast: ChildrenNodes, $vm: ComponentInstance) 
 			if (chi._isVnode) {
 				return chi;
 			} else if (chi.type === "Text") {
-				return renderStr.call(this, `h('',null,${paresText.call(this, chi.children, $vm)})`);
+				return renderStr.call(this, `h('',null,${paresText.call(this, chi.children)})`);
 			} else if (chi.type === "Element") {
 				this.chi = chi;
 				this.isComponents = isComponents;

@@ -1,95 +1,33 @@
+import { useRouter } from "./routers/createrRouter";
 import { getCurrentInstace, h, inject, provide, ref, watchEffect } from "./runtime-core/Vue";
 
 export const App: Component = {
 	name: "App",
 	setup() {
+		const router = useRouter() as any;
+
 		const msg = (window.s = ref("哈哈哈"));
 
 		const name = (window.vs = ref("App组件的作用域"));
 
 		provide("name", name);
 
-		const list = ref(["A", "B", "C", "D", "E"]);
-
-		const onClick = function () {
-			list.value.push("F");
+		const onClickToRouter = () => {
+			router.push("index");
 		};
 
 		return {
 			msg: msg,
-			list,
-			onClick
+			onClickToRouter
 		};
 	},
 	template: `
 		<div id="App">
-			<p v-for="(item,index) in list" :key="index">
-				{{ item }}
-			</p>
-			<button @click="onClick">点击添加新增数据</button>
+			<router-view></router-view>
+			<button @click="onClickToRouter">点击跳转到指定页面</button>
         </div>
 	`,
-	component: {
-		MyInput: {
-			name: "MyInput",
-			props: ["age"],
-			setup(props) {
-				const instace = getCurrentInstace();
-
-				const txt = (window.txt = ref("修改信息"));
-
-				const name = inject("name");
-
-				const data = ref(`子组件传的msg`);
-
-				const count = ref(0);
-
-				watchEffect(() => {
-					count.value = props.age;
-				});
-
-				const onClick = () => {
-					props.age++;
-				};
-
-				return {
-					txt,
-					name,
-					data,
-					count,
-					onClick
-				};
-			},
-
-			template: `
-                <div>
-                    <div>我是MyInput组件 => {{ txt }}</div>
-					<MyChildren>
-						<slot v-slot="name"></slot>
-					</MyChildren>
-					<slot></slot>
-					<div @click="onClick">
-						计数器:=> {{ count }}
-					</div>
-                </div>
-            `,
-			component: {
-				MyChildren: {
-					name: "MyChildren",
-					setup() {
-						return {};
-					},
-					template: `
-					<div>
-						<slot>
-							<div>如果没有插槽则单独显示这个插槽</div>
-						</slot>	
-					</div>
-				`
-				}
-			}
-		}
-	}
+	component: {}
 };
 
 export const AppChiren: Component = {
