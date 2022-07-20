@@ -30,6 +30,7 @@ export function createrRouter(options: RouterOptions) {
 /*实现 router-view */
 function install(app: CreateApp) {
 	app.components("router-view", {
+		name: "RouterView",
 		setup() {
 			const router = currentRoute;
 
@@ -44,7 +45,7 @@ function install(app: CreateApp) {
 			};
 		},
 		render() {
-			return h("div", {}, [h(globalComponents.get("components")!, { is: this.component }, null)]);
+			return h("div", {}, [h(this.component, {}, null)]);
 		}
 	});
 }
@@ -68,8 +69,6 @@ export function useRouter() {
 
 export function getCurrentRouter(options: any) {
 	const base = options.history.base;
-
 	const arr = options.router.filter((el: any) => el.path === base)[0];
-
 	return arr.component;
 }

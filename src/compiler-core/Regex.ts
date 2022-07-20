@@ -1,7 +1,7 @@
 export let interpolationRxg = /^\{\{(.+)\}\}/;
 
 export let startTagRxg =
-	/^<(\w*(-\w+)?)\s*((\s*(:|@|#)?(\w+-?\w+?)(=?"?([(a-z0-9\u4e00-\u9fa5),]*)"?)?)\s*)*?\/?>/;
+	/^<(\w*(-\w+)?)\s*((\s*(:|@|#)?(\w+-?\w+?)(=?"?([(a-z0-9\u4e00-\u9fa5),\.]*)"?)?)\s*)*?\/?>/;
 
 export let endTagRxg = /^<\/(\w+(-\w+)?)>/;
 

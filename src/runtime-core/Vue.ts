@@ -20,6 +20,7 @@ import {
 	shallowReadonly,
 	isProxy
 } from "../reactivity/reactive";
+import { computed } from "../reactivity/computed";
 
 export {
 	createApp,
@@ -40,5 +41,6 @@ export {
 	isReadonly,
 	shallowReadonly,
 	isProxy,
-	onBeforeUninstall
+	onBeforeUninstall,
+	computed
 };

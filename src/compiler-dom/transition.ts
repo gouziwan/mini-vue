@@ -42,6 +42,9 @@ export function transition(ast: ChildrenNodes): RenderType {
 export function generate(this: any, $vm: ComponentInstance, ast: ChildrenNodes) {
 	this.ast = ast;
 	this.$vm = $vm;
+	for (let k in this.$vm.state) {
+		this[k] = this.$vm.state[k];
+	}
 
 	const vnode = renderStr.call(
 		this,
@@ -190,7 +193,21 @@ function _createSlot(this: any, ast: ChildrenNodes, $vm: any) {
 
 // 判断是不是组件 isComponents
 function isComponents(tag: string, $vm: ComponentInstance) {
-	return !!($vm._components && $vm._components[tag]);
+	return !!(($vm._components && $vm._components[tag]) || globalComponents.has(tag));
+}
+
+function isSlotsName(arr: Array<any>) {
+	let index = -1;
+	for (let i = 0; i < arr.length; i++) {
+		const { name, value } = arr[i];
+
+		if (name === "name") {
+			index = i;
+			return index;
+		}
+	}
+
+	return index;
 }
 
 // 处理slot
@@ -204,34 +221,31 @@ function withSlots(vnode: any, chi: any, $vm: ComponentInstance): VNode {
 		vnode.type = `template`;
 	}
 
-	for (let key = 0; key < chi.attrs.length; key++) {
-		let k = chi.attrs[key];
+	const index = isSlotsName(chi.attrs);
 
-		if (k.name === "v-slot") {
-			let children = $vm.$slots[k.value.replace(/\"/g, "")];
+	if (index !== -1) {
+		let k = chi.attrs[index];
+		if (k.name === "name") {
+			const fn = $vm.$slots[k.value.replace(/\"/g, "")];
+
+			if (isFunction(fn)) {
+				return fn();
+			}
+		}
+	} else {
+		if ($vm.$slots["default"]) {
+			let children = $vm.$slots["default"];
+
+			if (children == undefined) return vnode;
 
 			if (isFunction(children)) {
 				children = children();
 			}
+
 			vnode.children = isArray(children) ? children : [children];
-
-			chi.attrs.splice(key, 1);
-
-			return vnode;
 		}
 	}
 
-	if ($vm.$slots["default"]) {
-		let children = $vm.$slots["default"];
-
-		if (children == undefined) return vnode;
-
-		if (isFunction(children)) {
-			children = children();
-		}
-
-		vnode.children = isArray(children) ? children : [children];
-	}
 	return vnode;
 }
 

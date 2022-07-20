@@ -2,7 +2,7 @@ import { effect } from "../reactivity/effect";
 import { getSequence } from "../utils/getSequence";
 import { addQueue } from "../utils/queue";
 import { getEventkey, isArray, isKeyEvent, isObject, isString } from "./../utils/index";
-import { createComponentInstall, setupComponent } from "./component";
+import { createComponentInstall, finishComponentSetup, setupComponent } from "./component";
 import { updateProps, isUpdateComponets } from "./componentProps";
 
 export function render(
@@ -87,6 +87,8 @@ function setupRenderEffect(
 				const subTree = (instace._subTree = instace._render!.call(_ctx));
 
 				patch(_prevSubTree, subTree, container, parent, anchor);
+
+				// console.log(_prevSubTree, subTree);
 
 				instace.activity?.onUpdated && instace.activity?.onUpdated();
 			}
@@ -310,6 +312,7 @@ function patchArrayChildren(
 		for (let i = toBePatched - 1; i >= 0; i--) {
 			const next = i + s2;
 			const nextChid = chi2[next].el;
+
 			// 这个是锚点 就是 当前的节点下一个节点 他可能是 null -> 就是往后面插入
 			const anchor = next + 1 <= chi2.length - 1 ? chi2[next + 1].el : null;
 

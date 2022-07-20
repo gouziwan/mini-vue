@@ -1,18 +1,24 @@
 import { createrRouter, createrWebHash } from "./routers";
 
+const Home: Component = {
+	template: `<div>hello world Home</div>`,
+	name: "Home"
+};
+
+const Index: Component = {
+	template: `<div>hello world index</div>`,
+	name: "Index"
+};
+
 const router: any[] = [
 	{
 		name: "Home",
-		component: {
-			template: `<div>hello world Home</div>`
-		},
+		component: Home,
 		path: "/"
 	},
 	{
 		name: "index",
-		component: {
-			template: `<div>hello world index</div>`
-		},
+		component: Index,
 		path: "/index"
 	}
 ];

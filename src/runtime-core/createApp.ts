@@ -18,7 +18,6 @@ export function createApp(rootComponents: Component) {
 		config: {
 			comments: globalComponents
 		},
-
 		components: registerComponents,
 		use: VueUse
 	};
@@ -59,14 +58,11 @@ function VueUse(this: CreateApp, value: any) {
 // 内置组件
 globalComponents.set("components", {
 	props: ["is"],
-	setup(props, { attr }) {
-		return {};
-	},
 	render() {
 		const component = isObject(this.$props.is)
 			? this.$props.is
 			: globalComponents.get(this.$props.is);
 
-		return h("template", {}, [h(component, this.$attr)]);
+		return h("template", {}, [h(component, this.$attr, this.$slots)]);
 	}
 });

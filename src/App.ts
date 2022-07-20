@@ -1,76 +1,70 @@
 import { useRouter } from "./routers/createrRouter";
-import { getCurrentInstace, h, inject, provide, ref, watchEffect } from "./runtime-core/Vue";
+import {
+	getCurrentInstace,
+	h,
+	inject,
+	provide,
+	ref,
+	watchEffect,
+	computed
+} from "./runtime-core/Vue";
 
-export const App: Component = {
-	name: "App",
+export const AppChilend: Component = {
 	setup() {
-		const router = useRouter() as any;
+		const data = inject("key", 3);
 
-		const msg = (window.s = ref("哈哈哈"));
-
-		const name = (window.vs = ref("App组件的作用域"));
-
-		provide("name", name);
-
-		const onClickToRouter = () => {
-			router.push("index");
-		};
-
-		return {
-			msg: msg,
-			onClickToRouter
-		};
+		return { data };
 	},
 	template: `
-		<div id="App">
-			<router-view></router-view>
-			<button @click="onClickToRouter">点击跳转到指定页面</button>
-        </div>
-	`,
-	component: {}
+		<div class="childend" :index-value="data">
+			<slot>
+				<div>
+					默认插槽默认值
+				</div>
+			</slot>
+			<slot name="name">
+				<div>这是name 插槽的默认值</div>
+			</slot>
+			<slot name="age">
+				<div>这是age 插槽的默认值</div>
+			</slot>
+		</div>
+	`
 };
 
-export const AppChiren: Component = {
-	render() {
-		return h("div", {}, [this.$slots.default({ name: "插槽中自组件参数传递给父组件" })]);
-	}
-};
-
-export const Apps: Component = {
-	name: "Apps",
+export const App: Component = {
 	setup() {
-		const msg = (window.s = ref("hello"));
+		provide("key", 123);
 
-		const boolean = (window.sw = ref(false));
+		const keys = (window.keys = ref(true));
 
-		const onClick = () => {
-			console.log(msg);
-		};
+		const className = computed(() => {
+			return keys.value == true ? "name" : "age";
+		});
 
 		return {
-			msg: msg,
-			boolean,
-			onClick
+			AppChilend,
+			keys,
+			className
 		};
 	},
-	render() {
-		return h("div", {}, [
-			h(
-				"div",
-				{
-					onClick: this.onClick
-				},
-				"666"
-			),
-			h(
-				AppChiren,
-				{},
-				{
-					default: (props: any) => {
-						return h("div", {}, props.name);
-					}
-				}
-			)
-		]);
+
+	template: `
+		<div class="name">
+			<AppChilend>
+				<template>
+					<div :class="className.value">
+						传递
+					</div>
+				</template>
+			</AppChilend>
+			<components :is="AppChilend">
+				<div #name>这是hello 插槽</div>
+				<div #age>age插槽</div>
+			</components>
+		</div>
+	`,
+	component: {
+		AppChilend: AppChilend
 	}
 };
