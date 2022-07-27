@@ -62,6 +62,7 @@ export function generate(this: any, $vm: ComponentInstance, ast: ChildrenNodes) 
 // 这个创建 返回是一个标签还是一个组件
 export function _createElement(tag: string, $vm: ComponentInstance) {
 	const { _components } = $vm;
+
 	tag = tag.trim();
 	// 是不是标签
 	if (TagMap[tag as keyof typeof TagMap] === true) {
@@ -79,10 +80,11 @@ export function _createElement(tag: string, $vm: ComponentInstance) {
 function _createProps(this: Ten, ast: ChildrenNodes, $vm: ComponentInstance) {
 	let props = {} as { [x: string]: any };
 
-	if (isArray(ast.attrs) && ast.attrs!.length <= 0) return props;
+	if ((isArray(ast.attrs) && ast.attrs!.length <= 0) || !isArray(ast.attrs)) return props;
 
 	for (let i = 0; i < ast.attrs!.length; i++) {
 		let { name, value } = ast.attrs![i];
+
 		if (name === "v-for") continue;
 
 		// 区分属性还是

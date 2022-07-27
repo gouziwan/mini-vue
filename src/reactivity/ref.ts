@@ -24,6 +24,8 @@ class RefImpl {
 	}
 }
 
+export type RefImplType = keyof typeof RefImpl;
+
 function convert(value: any) {
 	return isObject(value) ? reactive(value) : value;
 }

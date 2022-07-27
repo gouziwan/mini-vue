@@ -83,6 +83,7 @@ function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 
 	// 弹出最后一个
 	const tag = stact[stact.length - 1].tag;
+
 	if (arr[1] === tag) {
 		// 就说明可以把当前的节点给到前一个节点了
 		// 还要判断是不是最后一个节点最后一个节点不做处理
@@ -101,12 +102,19 @@ function endTag(stact: ChildrenNodes[], template: ContentTemplate) {
 // 解析文字模板
 function paresText(stact: ChildrenNodes[], template: ContentTemplate) {
 	let text = template.socucs.match(TextRxg)![1];
+
+	// 先判断后面还要没有标签
+	// if()
+
 	// 需要判断有没有插值语法的
 	const arrText: any[] = [];
+
 	let nums = text.search(searchTag);
+
 	if (nums !== -1) {
 		text = text.slice(0, nums);
 	}
+
 	let len = nums === -1 ? text.length : nums;
 
 	if (TextsRxg.test(text)) {

@@ -3,9 +3,14 @@ type EffectScheduler = {
 	onStop?: Function;
 };
 
+interface RefImplType {
+	_value: any;
+	value: any;
+}
+
 interface CreateApp {
 	mount(rootConents: string | HTMLDivElement): void;
-	config: { comments: Map<string, Component> };
+	config: { comments: Map<string, Component>; [x: string]: any };
 	components: (key: string, components: Component) => CreateApp;
 	use: (this: CreateApp, value: any) => CreateApp;
 }
@@ -107,11 +112,19 @@ interface Ten {
 
 interface RouterOptions {
 	history: any;
-	router: Router[];
+	router: any[];
 }
 
 interface Router {
 	name: string;
-	comments: Component;
-	path: "";
+	path: string;
+	query: Object<RefImplType>;
+	meta: any;
+	hash: string;
+}
+
+interface RouterPushState {
+	name?: string;
+	path?: string;
+	state?: any;
 }

@@ -356,8 +356,13 @@ function mountElement(
 
 	const { type, children, props } = vnode as VNode;
 
-	if (type === "" && isString(children)) {
+	if (type == "" && isString(children)) {
 		vnode.el = setChilderText(container, children);
+		return;
+	}
+
+	//等于空
+	if (type == "") {
 		return;
 	}
 
