@@ -12,3 +12,23 @@
 - [x] shallowReadonly函数
 - [x] 依赖收集track函数
 - [x] 依赖更新trigger函数
+- [x] WatchEffect函数
+- [x] inject函数
+- [x] provide函数
+
+### 2.虚拟dom
+ - [x] h函数
+ - [x] createApp函数
+ - [x] 虚拟dom
+ - [x] render函数
+ - [x] diif算法对比
+ - [x] props传递
+ - [x] emit事件触发
+ - [x] slots插槽
+ - [x] getCurrentInstace函数
+ - [x] onMounted 函数
+ - [x] 	onBeforeMountd 函数
+ - [x] onBeforeUpdate函数
+ - [x] onUpdated函数
+ - [x] onBeforeUninstall函数
+ - [x] nextTick函数
